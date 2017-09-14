@@ -80,7 +80,10 @@ module VagrantPlugins
             sync_folders = {}
             # Still sync existing synced folders from vagrantfile
             config_synced_folders = machine.config.vm.synced_folders.values.map { |x| x[:hostpath] }
-            config_synced_folders.map! { |x| File.expand_path(x, machine.env.root_path) }
+            config_synced_folders.map! do |x|
+              x = File.expand_path(x, machine.env.root_path)
+              File.readlink(x) rescue x
+            end
             folders.each do |id, folder_opts|
               if cwd != folder_opts[:hostpath] &&
                   !config_synced_folders.include?(folder_opts[:hostpath])
